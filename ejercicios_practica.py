@@ -15,6 +15,7 @@ __author__ = "Inove Coding School"
 __email__ = "alumnos@inove.com.ar"
 __version__ = "1.1"
 
+from abc import abstractmethod
 import sqlite3
 
 # https://extendsclass.com/sqlite-browser.html
@@ -67,6 +68,20 @@ def fill():
     # Se debe utilizar la sentencia INSERT.
     # Observar que hay campos como "grade" y "tutor" que no son obligatorios
     # en el schema creado, puede obivar en algunos casos completar esos campos
+    conexion = sqlite3.connect('secundaria.db')
+    cursor = conexion.cursor()
+    
+    datos = [('matias toniolo', 36, 1, 'inove'),
+             ('sergio perez', 44, 2, 'susana gimenez'),
+             ('natalia luna', 33, 3, 'sandro loria'),
+             ('miriam gonzalez', 39, 4, 'mirtha legrand'),
+             ('nahuel anderson', 21, 5, 'carlos bianchi'),
+             ('lorena pomina', 52, 6, 'carlos bilardo')]
+    cursor.executemany("INSERT INTO estudiante VALUES(NULL,?,?,?,?)", datos)
+    conexion.commit()
+    conexion.close()
+    
+    
 
 
 def fetch():
@@ -74,6 +89,19 @@ def fetch():
     # Utilizar la sentencia SELECT para imprimir en pantalla
     # todas las filas con todas sus columnas
     # Utilizar fetchone para imprimir de una fila a la vez
+    conexion = sqlite3.connect('secundaria.db')
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM estudiante")
+    while True:
+        r = cursor.fetchone()
+        if r is None:
+            break
+        print(r)
+    
+    conexion.close()
+    
+    
+    
 
 
 def search_by_grade(grade):
@@ -84,12 +112,28 @@ def search_by_grade(grade):
     # De la lista de esos estudiantes el SELECT solo debe traer
     # las siguientes columnas por fila encontrada:
     # id / name / age
+    conexion = sqlite3.connect('secundaria.db')
+    cursor = conexion.cursor()
+    for row in cursor.execute('SELECT id, name, age FROM estudiante WHERE grade =?', (grade,)):
+        print(row)
+    
+    conexion.close()
+    
+    
 
 
-def insert(grade):
+def insert():
     print('Nuevos ingresos!')
     # Utilizar la sentencia INSERT para ingresar nuevos estudiantes
     # a la secundaria
+    conexion = sqlite3.connect('secundaria.db')
+    cursor = conexion.cursor()
+    ingresos = [('eleonora casano', 77, 3, 'crintino ronaldo'),
+                ('ricardo fort', 51, 1, 'fel fort'),
+                ('eduardo martiniano', 39, 5, 'alejandro fantino')]
+    cursor.executemany("INSERT INTO estudiante VALUES(NULL,?,?,?,?)", ingresos)
+    conexion.commit()
+    conexion.close()
 
 
 def modify(id, name):
@@ -97,20 +141,24 @@ def modify(id, name):
     # Utilizar la sentencia UPDATE para modificar aquella fila (estudiante)
     # cuyo id sea el "id" pasado como parámetro,
     # modificar su nombre por "name" pasado como parámetro
+    conexion = sqlite3.connect('secundaria.db')
+    cursor = conexion.cursor()
+    b = cursor.execute("UPDATE estudiante SET name=? WHERE id=?", (name, id))
+    conexion.commit()
+    conexion.close()
 
 
 if __name__ == '__main__':
     print("Bienvenidos a otra clase de Inove con Python")
     create_schema()   # create and reset database (DB)
-    # fill()
-    # fetch()
+    fill()
+    fetch()
 
     grade = 3
-    # search_by_grade(grade)
+    search_by_grade(grade)
 
-    new_student = ['You', 16]
-    # insert(new_student)
+    insert()
 
     name = '¿Inove?'
     id = 2
-    # modify(id, name)
+    modify(id, name)
